@@ -414,8 +414,9 @@ else
   bad "Codex agent_message hotfix wiring is incomplete"
 fi
 if grep -q 'VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS: "${VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS:-1800}"' docker-compose.dspark.yml \
-  && grep -q 'TILELANG_CACHE_DIR: "${TILELANG_CACHE_DIR:-/cache/huggingface/tilelang-cache}"' docker-compose.dspark.yml; then
-  ok "compose JIT timeout 1800s + persistent TileLang cache (#65/#87)"
+  && grep -q 'TILELANG_CACHE_DIR: "${TILELANG_CACHE_DIR:-/runtime_assets/tilelang-cache}"' docker-compose.dspark.yml \
+  && grep -q '${RUNTIME_ASSETS:-${HF_CACHE:-${HOME}/.cache/huggingface}/runtime_assets}:/runtime_assets' docker-compose.dspark.yml; then
+ok "compose JIT timeout 1800s + dedicated runtime-assets cache (#65/#87)"
 else
   bad "compose missing VLLM_EXECUTE_MODEL_TIMEOUT_SECONDS=1800 or TILELANG_CACHE_DIR"
 fi

@@ -2049,15 +2049,17 @@ for _ in $(seq 1 "$WAIT_ATTEMPTS"); do
         _warmup_bearer="${_dspark_keys[0]}"
       fi
       # Sampler-cache postcondition (see the sweep script): hand the child the
-      # HOST path of this node's persistent Triton cache. Only the compose
-      # default layout (container path under /cache/huggingface, backed by the
-      # HF_CACHE bind mount) is mappable from here; any custom TRITON_CACHE_DIR
-      # gets an empty path and the sweep skips that check with a note.
-      _warmup_tcache_container="${TRITON_CACHE_DIR:-/cache/huggingface/triton-cache}"
+      # HOST path of this node's persistent Triton cache. Both supported
+      # container layouts are mappable: the legacy HF path and the dedicated
+      # /runtime_assets mount.
+      _warmup_tcache_container="${TRITON_CACHE_DIR:-/runtime_assets/triton-cache}"
       _warmup_tcache_host=""
       case "$_warmup_tcache_container" in
         /cache/huggingface/*)
           _warmup_tcache_host="${HF_CACHE:-${HOME}/.cache/huggingface}${_warmup_tcache_container#/cache/huggingface}"
+          ;;
+        /runtime_assets/*)
+          _warmup_tcache_host="${RUNTIME_ASSETS:-}${_warmup_tcache_container#/runtime_assets}"
           ;;
       esac
       DSPARK_WARMUP_MAX_CONCURRENCY="${MAX_NUM_SEQS:-6}" \
